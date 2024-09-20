@@ -13,6 +13,7 @@
   "dependencies": {
     "@evaafi/sdk": "^0.5.5",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.2",
     "@react-spring/web": "^9.7.3",
     "@sentry/react": "^7.92.0",
     "@sentry/vite-plugin": "^2.10.2",

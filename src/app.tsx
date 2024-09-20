@@ -1,6 +1,7 @@
 import { Logo } from './components/Logo';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { Button } from './components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs';
 
 export default function App() {
   return (

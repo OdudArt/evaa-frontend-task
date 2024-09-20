@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import withHapticFeedback from '../hocs/withHapticFeedback';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.02] active:scale-[0.95]',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-base ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.02] active:scale-[0.95]',
   {
     variants: {
       variant: {
@@ -21,7 +21,7 @@ const buttonVariants = cva(
         navItem: 'gap-0.5 flex-col py-0 px-3 text-[0.6875rem] hover:bg-transparent hover:opacity-90'
       },
       size: {
-        default: 'h-12 px-5 py-2 font-black tracking-wide text-[17px]',
+        default: 'h-12 px-5 py-2',
         sm: 'h-8 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10'
