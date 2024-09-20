@@ -31,7 +31,3 @@ VS Code - https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vs
 VIM - https://prettier.io/docs/en/vim
 
 Webstorm - Built-in
-
-## Contacts
-
-If you want to contribute or found a bug, write here on telegram please - @sepezho, @rashdeva or @alexuniverse12
