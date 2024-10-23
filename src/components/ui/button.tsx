@@ -12,18 +12,20 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input border-primary bg-background text-foreground hover:text-accent-foreground',
+        outline: 'border border-input text-foreground hover:text-accent-foreground',
         active: 'text-primary hover:bg-accent',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:text-primary',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        ghost: 'bg-card-shadow text-[#8c8c8c] hover:bg-accent hover:text-accent-foreground',
         card: 'bg-accent text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
-        navItem: 'gap-0.5 flex-col py-0 px-3 text-[0.6875rem] hover:bg-transparent hover:opacity-90'
+        navItem: 'gap-0.5 flex-col py-0 px-3 text-[0.6875rem] hover:bg-transparent hover:opacity-90',
+        text: 'text-secondary'
       },
       size: {
+        fit: 'h-fit	w-fit',
         default: 'h-12 px-5 py-2',
-        sm: 'h-8 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
+        sm: 'h-9 rounded-md px-3 text-sm',
+        lg: 'h-11 rounded-sm px-8 py-4 text-lg',
         icon: 'h-10 w-10'
       }
     },

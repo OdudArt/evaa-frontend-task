@@ -10,7 +10,6 @@
   html {
     @apply bg-background text-foreground;
   }
-
   @font-face {
     font-family: 'Gilroy';
     src:
@@ -283,5 +282,10 @@
       radial-gradient(43.97% 54.13% at 4.53% 7.98%, #000 0%, rgba(0, 0, 0, 0) 100%),
       radial-gradient(23.77% 42.42% at 35.17% 116.1%, #000 0%, rgba(0, 0, 0, 0) 100%),
       linear-gradient(180deg, var(--tg-theme-button-color) 0%, #000 150.55%);
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 }
