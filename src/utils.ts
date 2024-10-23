@@ -5,7 +5,9 @@ type CurrencyIconType = (props: SVGProps<SVGSVGElement>) => ReactNode;
 
 export const currencyIcon: { [key: string]: CurrencyIconType } = {
   TON: TonIcon,
-  USDT: UsdtIcon
+  USDT: UsdtIcon,
+  jUSDT: UsdtIcon,
+  stTON: TonIcon
 };
 
 export function isEmpty<T extends object>(obj: T = {} as T) {

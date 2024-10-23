@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Logo } from './components/Logo';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { Button } from './components/ui/button';
@@ -8,16 +8,18 @@ import { ArrowDownUp, CirclePlusIcon, Upload } from 'lucide-react';
 import { EvaaApi } from './api';
 import { apiConfig } from './configs';
 import useCompoundInterest from './hooks/useCompoundInterest';
-import { ExtendedAssetsData, MAINNET_POOL_CONFIG, PriceData } from '@evaafi/sdk';
-import { currencyIcon, isEmpty, roundNum } from './utils';
+import { ExtendedAssetsData, TESTNET_POOL_CONFIG, PriceData } from '@evaafi/sdk';
+import { currencyIcon, roundNum } from './utils';
 import { AssetType, OperationType } from './types';
 import useAssetConversion from './hooks/useAssetConversion';
+import clsx from 'clsx';
+import useOperationRate from './hooks/useOperationRate';
 
 const evaaApi = new EvaaApi(apiConfig);
 
 export default function App() {
   const [assets] = useState(
-    MAINNET_POOL_CONFIG.poolAssetsConfig.filter((asset) => asset.name === 'USDT' || asset.name === 'TON')
+    TESTNET_POOL_CONFIG.poolAssetsConfig.filter((asset) => asset.name === 'stTON' || asset.name === 'TON')
   );
   const durations: number[] = [1, 6];
   const operationsTypes: OperationType[] = ['supply', 'borrow'];
@@ -35,21 +37,18 @@ export default function App() {
     evaaApi.getPrices().then(setPrices);
   }, []);
 
-  const operationRate = useMemo(() => {
-    if (isEmpty(assetsData)) return 0;
-    const selectedAssetsData = assetsData?.get(selectedAsset.assetId);
-
-    if (selectedOperationType === 'supply') return selectedAssetsData?.supplyApy ?? 0;
-    return selectedAssetsData?.borrowApy ?? 0;
-  }, [selectedOperationType, assetsData]);
-
-  const covertedValue = useAssetConversion({ value, asset: selectedAsset, prices, type: selectedAssetType });
+  const operationRate = useOperationRate({
+    assetId: selectedAsset.assetId,
+    operationType: selectedOperationType,
+    assetsData
+  });
+  const covertedValue = useAssetConversion({ value, asset: selectedAsset, prices, assetType: selectedAssetType });
   const interest = useCompoundInterest({
     value: selectedAssetType === 'crypto' ? Number(value) : covertedValue,
     rate: operationRate,
     months: selectedDuration
   });
-  const covertedInterest = useAssetConversion({ value: interest, asset: selectedAsset, prices, type: 'crypto' });
+  const covertedInterest = useAssetConversion({ value: interest, asset: selectedAsset, prices, assetType: 'crypto' });
 
   return (
     <div className="container max-w-xl">
@@ -86,7 +85,7 @@ export default function App() {
                   </Button>
                   <div className="flex text-xs gap-1 mx-auto text-muted-foreground mt-2">
                     <span className="capitalize">{selectedOperationType}</span> APY
-                    <span className="font-semibold text-white">{roundNum(operationRate * 100)}%</span>
+                    <span className="font-bold text-white">{roundNum(operationRate * 100)}%</span>
                   </div>
                 </div>
               );
@@ -126,7 +125,7 @@ export default function App() {
                   key={`duration-btn-${idx}`}
                   variant="text"
                   size="fit"
-                  className="font-bold"
+                  className={clsx('font-bold', { 'text-primary': selectedDuration === item })}
                   onClick={() => setSelectedDuration(item)}>
                   {item} MONTH
                 </Button>

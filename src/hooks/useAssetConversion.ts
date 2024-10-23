@@ -7,9 +7,9 @@ interface UseAssetConversionProps {
   prices?: PriceData;
   asset?: PoolAssetConfig;
   value?: string | number;
-  type: AssetType;
+  assetType: AssetType;
 }
-const useAssetConversion = ({ prices, asset, value, type }: UseAssetConversionProps) =>
+const useAssetConversion = ({ prices, asset, value, assetType }: UseAssetConversionProps) =>
   useMemo(() => {
     if (isEmpty(prices) || isEmpty(asset) || !value) return 0;
 
@@ -17,8 +17,9 @@ const useAssetConversion = ({ prices, asset, value, type }: UseAssetConversionPr
     const priceScaleFactor = BigInt(1e9);
     const price = Number(assetPrice) / Number(priceScaleFactor);
 
-    if (type === 'fiat') return roundNum(Number(value) / price);
+    if (assetType === 'fiat') return roundNum(Number(value) / price);
+
     return roundNum(Number(value) * price);
-  }, [prices, asset, value, type]);
+  }, [prices, asset, value, assetType]);
 
 export default useAssetConversion;
