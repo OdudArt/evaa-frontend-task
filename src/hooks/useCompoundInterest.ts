@@ -2,17 +2,18 @@ import { roundNum } from '@/utils';
 import { useMemo } from 'react';
 
 interface UseCompoundInterestProps {
-  value: number;
-  rate: number;
-  months: number;
+  value?: number;
+  rate?: number;
+  months?: number;
 }
-const useCompoundInterest = ({ value, rate, months }: UseCompoundInterestProps) =>
-  useMemo(() => {
-    const period = 12;
-    const duration = months / 12;
-    const amount = value * Math.pow(1 + rate / period, period * duration);
+const compoundInterest = ({ value, rate, months }: UseCompoundInterestProps) => {
+  if (!value || !rate || !months) return 0;
+  const period = 12;
+  const duration = months / 12;
+  const amount = value * Math.pow(1 + rate / period, period * duration);
+  return roundNum(amount);
+};
 
-    return roundNum(amount);
-  }, [value, rate, months]);
+const useCompoundInterest = (props: UseCompoundInterestProps) => useMemo(() => compoundInterest(props), [props]);
 
-export default useCompoundInterest;
+export { compoundInterest, useCompoundInterest };

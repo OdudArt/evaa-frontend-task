@@ -1,25 +1,23 @@
 import { AssetType } from '@/types';
-import { isEmpty, roundNum } from '@/utils';
-import { PoolAssetConfig, PriceData } from '@evaafi/sdk';
+import { roundNum } from '@/utils';
 import { useMemo } from 'react';
 
-interface UseAssetConversionProps {
-  prices?: PriceData;
-  asset?: PoolAssetConfig;
+interface AssetConversionProps {
+  price?: bigint;
   value?: string | number;
   assetType: AssetType;
 }
-const useAssetConversion = ({ prices, asset, value, assetType }: UseAssetConversionProps) =>
-  useMemo(() => {
-    if (isEmpty(prices) || isEmpty(asset) || !value) return 0;
 
-    const assetPrice = prices?.dict.get(asset!.assetId);
-    const priceScaleFactor = BigInt(1e9);
-    const price = Number(assetPrice) / Number(priceScaleFactor);
+const assetConversion = ({ price, value, assetType }: AssetConversionProps) => {
+  if (!price || !value) return 0;
+  const priceScaleFactor = BigInt(1e9);
+  const assetPrice = Number(price) / Number(priceScaleFactor);
 
-    if (assetType === 'fiat') return roundNum(Number(value) / price);
+  if (assetType === 'fiat') return roundNum(Number(value) / assetPrice);
 
-    return roundNum(Number(value) * price);
-  }, [prices, asset, value, assetType]);
+  return roundNum(Number(value) * assetPrice);
+};
 
-export default useAssetConversion;
+const useAssetConversion = (props: AssetConversionProps) => useMemo(() => assetConversion(props), [props]);
+
+export { assetConversion, useAssetConversion };

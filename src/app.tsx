@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Logo } from './components/Logo';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { Button } from './components/ui/button';
@@ -7,13 +7,14 @@ import { Input } from './components/ui/input';
 import { ArrowDownUp, CirclePlusIcon, Upload } from 'lucide-react';
 import { EvaaApi } from './api';
 import { apiConfig } from './configs';
-import useCompoundInterest from './hooks/useCompoundInterest';
-import { ExtendedAssetsData, TESTNET_POOL_CONFIG, PriceData } from '@evaafi/sdk';
+import { ExtendedAssetsData, TESTNET_POOL_CONFIG } from '@evaafi/sdk';
 import { currencyIcon, roundNum } from './utils';
 import { AssetType, OperationType } from './types';
-import useAssetConversion from './hooks/useAssetConversion';
 import clsx from 'clsx';
-import useOperationRate from './hooks/useOperationRate';
+import { useAssetConversion } from './hooks/useAssetConversion';
+import { Dictionary } from '@ton/core';
+import { useCompoundInterest } from './hooks/useCompoundInterest';
+import { useOperationRate } from './hooks/useOperationRate';
 
 const evaaApi = new EvaaApi(apiConfig);
 
@@ -25,30 +26,40 @@ export default function App() {
   const operationsTypes: OperationType[] = ['supply', 'borrow'];
 
   const [value, setValue] = useState<string>('');
-  const [prices, setPrices] = useState<PriceData>();
-  const [assetsData, setAssetsData] = useState<ExtendedAssetsData>();
+  const [pricesDict, setPricesDict] = useState<Dictionary<bigint, bigint>>();
+  const [assetsDict, setAssetsDict] = useState<ExtendedAssetsData>();
   const [selectedAsset, setSelectedAsset] = useState(assets[0]);
   const [selectedAssetType, setSelectedAssetType] = useState<AssetType>('crypto');
   const [selectedOperationType, setSelectedOperationType] = useState<OperationType>('supply');
   const [selectedDuration, setSelectedDuration] = useState<number>(durations[0]);
 
   useEffect(() => {
-    evaaApi.getSync().then((res) => setAssetsData(res?.assetsData));
-    evaaApi.getPrices().then(setPrices);
+    evaaApi.getSync().then((res) => setAssetsDict(res?.assetsData));
+    evaaApi.getPrices().then((res) => setPricesDict(res.dict));
   }, []);
 
+  const assetPrice = useMemo(() => pricesDict?.get(selectedAsset.assetId), [pricesDict, selectedAsset]);
+  const assetData = useMemo(() => assetsDict?.get(selectedAsset.assetId), [assetsDict, selectedAsset]);
+
   const operationRate = useOperationRate({
-    assetId: selectedAsset.assetId,
     operationType: selectedOperationType,
-    assetsData
+    assetData
   });
-  const covertedValue = useAssetConversion({ value, asset: selectedAsset, prices, assetType: selectedAssetType });
+  const covertedValue = useAssetConversion({
+    value,
+    price: assetPrice,
+    assetType: selectedAssetType
+  });
   const interest = useCompoundInterest({
     value: selectedAssetType === 'crypto' ? Number(value) : covertedValue,
     rate: operationRate,
     months: selectedDuration
   });
-  const covertedInterest = useAssetConversion({ value: interest, asset: selectedAsset, prices, assetType: 'crypto' });
+  const covertedInterest = useAssetConversion({
+    value: interest,
+    price: assetPrice,
+    assetType: 'crypto'
+  });
 
   return (
     <div className="container max-w-xl">
@@ -85,7 +96,9 @@ export default function App() {
                   </Button>
                   <div className="flex text-xs gap-1 mx-auto text-muted-foreground mt-2">
                     <span className="capitalize">{selectedOperationType}</span> APY
-                    <span className="font-bold text-white">{roundNum(operationRate * 100)}%</span>
+                    <span className="font-bold text-white">
+                      {operationRate ? `${roundNum(operationRate * 100)}%` : '—'}
+                    </span>
                   </div>
                 </div>
               );

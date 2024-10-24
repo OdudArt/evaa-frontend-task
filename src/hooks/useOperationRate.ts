@@ -1,21 +1,18 @@
 import { OperationType } from '@/types';
 import { isEmpty } from '@/utils';
-import { ExtendedAssetsData } from '@evaafi/sdk';
+import { ExtendedAssetData } from '@evaafi/sdk';
 import { useMemo } from 'react';
 
 interface UseOperationRatetProps {
-  assetId?: bigint;
-  assetsData?: ExtendedAssetsData;
-  operationType: OperationType;
+  assetData?: ExtendedAssetData;
+  operationType?: OperationType;
 }
-const useOperationRate = ({ assetId, assetsData, operationType }: UseOperationRatetProps) =>
-  useMemo(() => {
-    if (isEmpty(assetsData) || !assetId) return 0;
+const operationRate = ({ assetData, operationType }: UseOperationRatetProps) => {
+  if (isEmpty(assetData) || !operationType) return 0;
+  if (operationType === 'supply') return assetData?.supplyApy ?? 0;
+  return assetData?.borrowApy ?? 0;
+};
 
-    const selectedAssetsData = assetsData?.get(assetId);
+const useOperationRate = (props: UseOperationRatetProps) => useMemo(() => operationRate(props), [props]);
 
-    if (operationType === 'supply') return selectedAssetsData?.supplyApy ?? 0;
-    return selectedAssetsData?.borrowApy ?? 0;
-  }, [operationType, assetId, assetsData]);
-
-export default useOperationRate;
+export { operationRate, useOperationRate };
