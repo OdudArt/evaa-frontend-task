@@ -288,4 +288,20 @@
     -webkit-appearance: none;
     margin: 0;
   }
+  .noise {
+    position: relative;
+    z-index: 2;
+  }
+  .noise:after {
+    content: '';
+    background: url(/noise.png) repeat;
+    mix-blend-mode: overlay;
+    position: absolute;
+    inset: 0;
+    opacity: 0.7;
+    z-index: 1;
+    background-size: 128px;
+    border-radius: inherit;
+    pointer-events: none;
+  }
 }

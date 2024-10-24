@@ -7,14 +7,13 @@ import { Input } from './components/ui/input';
 import { ArrowDownUp, CirclePlusIcon, Upload } from 'lucide-react';
 import { EvaaApi } from './api';
 import { apiConfig } from './configs';
-import { ExtendedAssetsData, TESTNET_POOL_CONFIG } from '@evaafi/sdk';
+import { ExtendedAssetsData, TESTNET_POOL_CONFIG, PoolAssetConfig } from '@evaafi/sdk';
 import { currencyIcon, roundNum } from './utils';
 import { AssetType, OperationType } from './types';
 import clsx from 'clsx';
 import { useAssetConversion } from './hooks/useAssetConversion';
 import { Dictionary } from '@ton/core';
 import { useCompoundInterest } from './hooks/useCompoundInterest';
-import { useOperationRate } from './hooks/useOperationRate';
 
 const evaaApi = new EvaaApi(apiConfig);
 
@@ -28,36 +27,32 @@ export default function App() {
   const [value, setValue] = useState<string>('');
   const [pricesDict, setPricesDict] = useState<Dictionary<bigint, bigint>>();
   const [assetsDict, setAssetsDict] = useState<ExtendedAssetsData>();
-  const [selectedAsset, setSelectedAsset] = useState(assets[0]);
+  const [selectedAsset, setSelectedAsset] = useState<PoolAssetConfig>(assets[0]);
   const [selectedAssetType, setSelectedAssetType] = useState<AssetType>('crypto');
   const [selectedOperationType, setSelectedOperationType] = useState<OperationType>('supply');
   const [selectedDuration, setSelectedDuration] = useState<number>(durations[0]);
+
+  const selectedAssetPrice = useMemo(() => pricesDict?.get(selectedAsset.assetId), [pricesDict, selectedAsset]);
+  const selectedAssetData = useMemo(() => assetsDict?.get(selectedAsset.assetId), [assetsDict, selectedAsset]);
 
   useEffect(() => {
     evaaApi.getSync().then((res) => setAssetsDict(res?.assetsData));
     evaaApi.getPrices().then((res) => setPricesDict(res.dict));
   }, []);
 
-  const assetPrice = useMemo(() => pricesDict?.get(selectedAsset.assetId), [pricesDict, selectedAsset]);
-  const assetData = useMemo(() => assetsDict?.get(selectedAsset.assetId), [assetsDict, selectedAsset]);
-
-  const operationRate = useOperationRate({
-    operationType: selectedOperationType,
-    assetData
-  });
   const covertedValue = useAssetConversion({
     value,
-    price: assetPrice,
+    price: selectedAssetPrice,
     assetType: selectedAssetType
   });
   const interest = useCompoundInterest({
     value: selectedAssetType === 'crypto' ? Number(value) : covertedValue,
-    rate: operationRate,
+    rate: selectedOperationType === 'borrow' ? selectedAssetData?.borrowApy : selectedAssetData?.supplyApy,
     months: selectedDuration
   });
   const covertedInterest = useAssetConversion({
     value: interest,
-    price: assetPrice,
+    price: selectedAssetPrice,
     assetType: 'crypto'
   });
 
@@ -65,7 +60,7 @@ export default function App() {
     <div className="container max-w-xl">
       <div className="flex flex-col h-dvh w-full items-center gap-10 py-10">
         <Logo />
-        <div className="rounded-lg px-5 pb-8 pt-5 bg-master w-full">
+        <div className="rounded-lg px-5 pb-8 pt-5 bg-master w-full noise">
           <Tabs
             value={selectedOperationType}
             onValueChange={(val) => setSelectedOperationType(val as OperationType)}
@@ -81,6 +76,10 @@ export default function App() {
           <div className="flex gap-2 flex-wrap">
             {assets.map((item, idx) => {
               const Icon = currencyIcon[item.name];
+              const data = assetsDict?.get(item.assetId);
+              const rate = selectedOperationType === 'borrow' ? data?.borrowApy : data?.supplyApy;
+              const percent = roundNum((rate ?? 0) * 100);
+
               return (
                 <div className="flex flex-1 flex-col" key={`token-${item.name}-${idx}`}>
                   <Button
@@ -96,9 +95,7 @@ export default function App() {
                   </Button>
                   <div className="flex text-xs gap-1 mx-auto text-muted-foreground mt-2">
                     <span className="capitalize">{selectedOperationType}</span> APY
-                    <span className="font-bold text-white">
-                      {operationRate ? `${roundNum(operationRate * 100)}%` : '—'}
-                    </span>
+                    <span className="font-bold text-foreground">{percent ? `${percent}%` : '—'}</span>
                   </div>
                 </div>
               );
@@ -124,7 +121,7 @@ export default function App() {
                 </Button>
               }
               caption={
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-gray-500">
                   ~{selectedAssetType === 'crypto' ? `$${covertedValue}` : `${covertedValue} ${selectedAsset.name}`}
                 </span>
               }
@@ -146,7 +143,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <section className="bg-hero text-hero-foreground  rounded-md px-5 py-6 w-full">
+        <section className="bg-hero text-hero-foreground noise rounded-md px-5 py-6 w-full">
           <div>
             <div className="text-sm">Potential Return</div>
             <div className="flex justify-between mt-1">
@@ -154,7 +151,7 @@ export default function App() {
                 <div>
                   <span className="text-2xl">{interest}</span> {selectedAsset.name}
                 </div>
-                <div className="text-sm text-muted-foreground">~${covertedInterest}</div>
+                <div className="text-sm text-gray-500">~${covertedInterest}</div>
               </div>
               <Button variant="secondary" className="min-w-48">
                 {selectedOperationType === 'supply' ? <CirclePlusIcon /> : <Upload size={20} />}

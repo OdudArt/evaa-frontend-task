@@ -19,7 +19,7 @@ const buttonVariants = cva(
         card: 'bg-accent text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         navItem: 'gap-0.5 flex-col py-0 px-3 text-[0.6875rem] hover:bg-transparent hover:opacity-90',
-        text: 'text-secondary'
+        text: 'text-foreground'
       },
       size: {
         fit: 'h-fit	w-fit',
